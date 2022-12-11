@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod enemy;
+mod menu;
 mod player;
 
 const WIN_WIDTH: f32 = 820.;
@@ -38,7 +39,7 @@ pub struct GameBackground {
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
-        .add_state(GameState::InGame)
+        .add_state(GameState::Menu)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
                 title: "The Chicken Road".to_string(),
@@ -50,6 +51,7 @@ fn main() {
             ..default()
         }))
         .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(menu::MenuPlugin)
         .add_plugin(player::PlayerPlugin)
         .add_plugin(enemy::EnemyPlugin)
         .add_startup_system(setup_system)
@@ -63,21 +65,21 @@ fn setup_system(
 ) {
     commands.spawn(Camera2dBundle::default());
 
-    let texture_handle = asset_server.load("chicken_sheet.png");
+    let texture_handle = asset_server.load("imgs/chicken_sheet.png");
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(16., 16.), 6, 4, None, None);
     let player = texture_atlases.add(texture_atlas);
 
     commands.insert_resource(GameTextures {
-        enemy_green: asset_server.load("car_green.png"),
-        enemy_red: asset_server.load("car_red.png"),
-        road: asset_server.load("road.png"),
+        enemy_green: asset_server.load("imgs/car_green.png"),
+        enemy_red: asset_server.load("imgs/car_red.png"),
+        road: asset_server.load("imgs/road.png"),
         player,
     });
 
     commands
         .spawn(GameBackground::default())
-        .insert(Name::new("GameBackground"));
+        .insert(Name::new("imgs/GameBackground"));
 }
 
 fn spawn_game_background(
