@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod enemy;
+mod game_over;
+mod in_game;
 mod menu;
 mod player;
 
@@ -15,6 +17,10 @@ const SIDE_WALK: f32 = 100.;
 
 const PLAYER_DIM: f32 = 16.;
 
+const COLOR_RED: (f32, f32, f32) = (255. / 255., 89. / 255., 94. / 255.);
+const COLOR_YELLOW: (f32, f32, f32) = (255. / 255., 202. / 255., 58. / 255.);
+const COLOR_GRAY: (f32, f32, f32) = (141. / 255., 153. / 255., 174. / 255.);
+
 #[derive(Resource)]
 pub struct GameTextures {
     player: Handle<TextureAtlas>,
@@ -27,13 +33,7 @@ pub struct GameTextures {
 pub enum GameState {
     Menu,
     InGame,
-    End,
-}
-
-#[derive(Component, Reflect, Default)]
-#[reflect(Component)]
-pub struct GameBackground {
-    visible: bool,
+    GameOver,
 }
 
 fn main() {
@@ -52,8 +52,8 @@ fn main() {
         }))
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(menu::MenuPlugin)
-        .add_plugin(player::PlayerPlugin)
-        .add_plugin(enemy::EnemyPlugin)
+        .add_plugin(in_game::InGamePlugin)
+        .add_plugin(game_over::GameOverPlugin)
         .add_startup_system(setup_system)
         .run();
 }
@@ -76,24 +76,4 @@ fn setup_system(
         road: asset_server.load("imgs/road.png"),
         player,
     });
-
-    commands
-        .spawn(GameBackground::default())
-        .insert(Name::new("imgs/GameBackground"));
-}
-
-fn spawn_game_background(
-    mut commands: Commands,
-    game_textures: Res<GameTextures>,
-    mut background_query: Query<&mut GameBackground>,
-) {
-    if let Ok(mut background) = background_query.get_single_mut() {
-        if !background.visible {
-            background.visible = true;
-            commands.spawn(SpriteBundle {
-                texture: game_textures.road.clone(),
-                ..default()
-            });
-        }
-    }
 }

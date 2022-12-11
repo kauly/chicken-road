@@ -1,8 +1,5 @@
-use crate::{GameState, SIDE_WALK, WIN_HEIGHT, WIN_WIDTH};
+use crate::{GameState, COLOR_RED, COLOR_YELLOW, SIDE_WALK, WIN_HEIGHT, WIN_WIDTH};
 use bevy::prelude::*;
-
-const COLOR_RED: (f32, f32, f32) = (255. / 255., 89. / 255., 94. / 255.);
-const COLOR_YELLOW: (f32, f32, f32) = (255. / 255., 202. / 255., 58. / 255.);
 
 pub struct MenuPlugin;
 
@@ -186,7 +183,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-fn button_control_system(
+pub fn button_control_system(
     kb: Res<Input<KeyCode>>,
     mut button_query: Query<&Interaction, With<Button>>,
     mut game_state: ResMut<State<GameState>>,
@@ -212,7 +209,7 @@ fn button_control_system(
     }
 }
 
-fn despawn_ui_system(mut commands: Commands, mut node_query: Query<Entity, With<Ancestor>>) {
+pub fn despawn_ui_system(mut commands: Commands, mut node_query: Query<Entity, With<Ancestor>>) {
     if let Ok(ent) = node_query.get_single_mut() {
         commands.entity(ent).despawn_recursive();
     }

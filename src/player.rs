@@ -1,7 +1,4 @@
-use crate::{
-    spawn_game_background, GameState, GameTextures, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP,
-    WIN_HEIGHT,
-};
+use crate::{GameTextures, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP, WIN_HEIGHT};
 use bevy::prelude::*;
 
 const PLAYER_RIGHT_SPRITE_INDEX: (usize, usize) = (0, 5);
@@ -18,10 +15,17 @@ fn get_sprite_index(dim: (usize, usize), current_index: usize) -> usize {
     return index;
 }
 
+pub enum Sidewalk {
+    Top,
+    Bottom,
+    None,
+}
+
 #[derive(Resource)]
 pub struct PlayerState {
     pub alive: bool,
     pub level: u8,
+    pub last_sidewalk: Sidewalk,
 }
 
 impl Default for PlayerState {
@@ -29,6 +33,7 @@ impl Default for PlayerState {
         Self {
             alive: true,
             level: 1,
+            last_sidewalk: Sidewalk::None,
         }
     }
 }
@@ -41,7 +46,7 @@ pub struct PlayerVelocity {
 }
 
 #[derive(Component)]
-enum Direction {
+pub enum Direction {
     Up,
     Down,
     Left,
@@ -51,26 +56,7 @@ enum Direction {
 #[derive(Component)]
 pub struct Player;
 
-pub struct PlayerPlugin;
-
-impl Plugin for PlayerPlugin {
-    fn build(&self, app: &mut App) {
-        app.register_type::<PlayerVelocity>()
-            .insert_resource(PlayerState::default())
-            .add_system_set(
-                SystemSet::on_update(GameState::InGame)
-                    .with_system(move_player_system)
-                    .with_system(player_input_system),
-            )
-            .add_system_set(
-                SystemSet::on_enter(GameState::InGame)
-                    .with_system(spawn_game_background)
-                    .with_system(spawn_player),
-            );
-    }
-}
-
-fn spawn_player(mut commands: Commands, game_textures: Res<GameTextures>) {
+pub fn spawn_player(mut commands: Commands, game_textures: Res<GameTextures>) {
     commands
         .spawn(SpriteSheetBundle {
             texture_atlas: game_textures.player.clone(),
@@ -99,7 +85,7 @@ fn spawn_player(mut commands: Commands, game_textures: Res<GameTextures>) {
         .insert(Name::new("Player"));
 }
 
-fn move_player_system(
+pub fn move_player_system(
     mut player_query: Query<
         (
             &mut Transform,
@@ -126,7 +112,7 @@ fn move_player_system(
     }
 }
 
-fn player_input_system(
+pub fn player_input_system(
     kb: Res<Input<KeyCode>>,
     mut player_query: Query<(&mut PlayerVelocity, &mut Direction), With<Player>>,
 ) {

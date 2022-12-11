@@ -1,6 +1,6 @@
 use crate::{
     player::{Player, PlayerState},
-    GameState, GameTextures, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP, WIN_WIDTH,
+    GameState, GameTextures, BASE_SPEED, PLAYER_DIM, TIME_STEP, WIN_WIDTH,
 };
 use bevy::math::Vec3Swizzles;
 use bevy::{prelude::*, sprite::collide_aabb::collide};
@@ -25,34 +25,17 @@ pub struct EnemyVelocity {
 }
 
 #[derive(Resource, Default)]
-struct EnemySpawnConfig {
+pub struct EnemySpawnConfig {
     timer: Timer,
 }
-pub struct EnemyPlugin;
 
-impl Plugin for EnemyPlugin {
-    fn build(&self, app: &mut App) {
-        app.register_type::<Enemy>()
-            .register_type::<EnemyVelocity>()
-            .add_system_set(
-                SystemSet::on_enter(GameState::InGame).with_system(setup_spawn_enemy_system),
-            )
-            .add_system_set(
-                SystemSet::on_update(GameState::InGame)
-                    .with_system(spawn_enemy_system)
-                    .with_system(move_enemy_system)
-                    .with_system(enemy_hit_player_system),
-            );
-    }
-}
-
-fn setup_spawn_enemy_system(mut commands: Commands) {
+pub fn setup_spawn_enemy_system(mut commands: Commands) {
     commands.insert_resource(EnemySpawnConfig {
         timer: Timer::new(Duration::from_secs(2), TimerMode::Repeating),
     });
 }
 
-fn spawn_enemy_system(
+pub fn spawn_enemy_system(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
     mut spawn_timer: ResMut<EnemySpawnConfig>,
@@ -97,7 +80,7 @@ fn spawn_enemy_system(
     }
 }
 
-fn move_enemy_system(
+pub fn move_enemy_system(
     mut commands: Commands,
     mut enemies_query: Query<(Entity, &mut Transform, &EnemyVelocity), With<Enemy>>,
     player_state: Res<PlayerState>,
@@ -110,15 +93,16 @@ fn move_enemy_system(
     }
 }
 
-fn enemy_hit_player_system(
+pub fn enemy_hit_player_system(
     mut commands: Commands,
-    mut enemy_query: Query<(&Transform, &mut EnemyVelocity), With<Enemy>>,
+    mut enemy_query: Query<(Entity, &Transform), With<Enemy>>,
     player_query: Query<(Entity, &Transform), With<Player>>,
     mut player_state: ResMut<PlayerState>,
+    mut game_state: ResMut<State<GameState>>,
 ) {
     if let Ok((player_ent, player_tf)) = player_query.get_single() {
         let player_scale = Vec2::from(player_tf.scale.xy());
-        for (enemy_tf, mut enemy_vel) in enemy_query.iter_mut() {
+        for (enemy_ent, enemy_tf) in enemy_query.iter_mut() {
             let enemy_scale = Vec2::from(enemy_tf.scale.xy());
 
             let collision = collide(
@@ -131,6 +115,9 @@ fn enemy_hit_player_system(
             if let Some(_) = collision {
                 player_state.alive = false;
                 commands.entity(player_ent).despawn();
+                commands.entity(enemy_ent).despawn();
+
+                game_state.set(GameState::GameOver).unwrap();
             }
         }
     }
