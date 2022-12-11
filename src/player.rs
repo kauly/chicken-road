@@ -1,6 +1,6 @@
 use crate::{
-    spawn_game_background, GameState, GameTextures, BASE_SPEED, SIDE_WALK, TIME_STEP, WIN_HEIGHT,
-    WIN_WIDTH,
+    spawn_game_background, GameState, GameTextures, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP,
+    WIN_HEIGHT,
 };
 use bevy::prelude::*;
 
@@ -8,10 +8,8 @@ const PLAYER_RIGHT_SPRITE_INDEX: (usize, usize) = (0, 5);
 const PLAYER_UP_SPRITE_INDEX: (usize, usize) = (6, 11);
 const PLAYER_LEFT_SPRITE_INDEX: (usize, usize) = (12, 17);
 const PLAYER_DOWN_SPRITE_INDEX: (usize, usize) = (18, 23);
-const PLAYER_DIM: f32 = 16.;
 
 fn get_sprite_index(dim: (usize, usize), current_index: usize) -> usize {
-    println!("dim: {:?}, index: {}", dim, current_index);
     let index = if current_index >= dim.0 && current_index < dim.1 {
         current_index + 1
     } else {
@@ -22,14 +20,14 @@ fn get_sprite_index(dim: (usize, usize), current_index: usize) -> usize {
 
 #[derive(Resource)]
 pub struct PlayerState {
-    alive: bool,
-    level: u8,
+    pub alive: bool,
+    pub level: u8,
 }
 
 impl Default for PlayerState {
     fn default() -> Self {
         Self {
-            alive: false,
+            alive: true,
             level: 1,
         }
     }
@@ -42,19 +40,12 @@ pub struct PlayerVelocity {
     pub y: f32,
 }
 
-#[derive(Component, Reflect)]
-#[reflect(Component)]
+#[derive(Component)]
 enum Direction {
     Up,
     Down,
     Left,
     Right,
-}
-
-impl Default for Direction {
-    fn default() -> Self {
-        Self::Up
-    }
 }
 
 #[derive(Component)]
@@ -65,52 +56,47 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<PlayerVelocity>()
-            .register_type::<Direction>()
             .insert_resource(PlayerState::default())
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
-                    .with_system(spawn_player)
                     .with_system(move_player_system)
-                    .with_system(player_input_system)
-                    .with_system(spawn_game_background),
+                    .with_system(player_input_system),
+            )
+            .add_system_set(
+                SystemSet::on_enter(GameState::InGame)
+                    .with_system(spawn_game_background)
+                    .with_system(spawn_player),
             );
     }
 }
 
-fn spawn_player(
-    mut commands: Commands,
-    game_textures: Res<GameTextures>,
-    mut player_state: ResMut<PlayerState>,
-) {
-    if !player_state.alive {
-        player_state.alive = true;
-        commands
-            .spawn(SpriteSheetBundle {
-                texture_atlas: game_textures.player.clone(),
-                sprite: TextureAtlasSprite {
-                    index: PLAYER_UP_SPRITE_INDEX.0,
-                    ..default()
+fn spawn_player(mut commands: Commands, game_textures: Res<GameTextures>) {
+    commands
+        .spawn(SpriteSheetBundle {
+            texture_atlas: game_textures.player.clone(),
+            sprite: TextureAtlasSprite {
+                index: PLAYER_UP_SPRITE_INDEX.0,
+                ..default()
+            },
+            transform: Transform {
+                translation: Vec3 {
+                    x: 0.,
+                    y: (-WIN_HEIGHT - SIDE_WALK + PLAYER_DIM) / 2.,
+                    z: 1.,
                 },
-                transform: Transform {
-                    translation: Vec3 {
-                        x: 0.,
-                        y: (-WIN_HEIGHT - SIDE_WALK + PLAYER_DIM) / 2.,
-                        z: 1.,
-                    },
-                    scale: Vec3 {
-                        x: 2.,
-                        y: 2.,
-                        z: 2.,
-                    },
-                    ..default()
+                scale: Vec3 {
+                    x: 2.,
+                    y: 2.,
+                    z: 2.,
                 },
                 ..default()
-            })
-            .insert(PlayerVelocity::default())
-            .insert(Player)
-            .insert(Direction::Up)
-            .insert(Name::new("Player"));
-    }
+            },
+            ..default()
+        })
+        .insert(PlayerVelocity::default())
+        .insert(Player)
+        .insert(Direction::Up)
+        .insert(Name::new("Player"));
 }
 
 fn move_player_system(
