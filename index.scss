@@ -14,4 +14,15 @@ body {
 
 canvas {
   border-radius: 20px;
+  display: none;
+  @media screen and (min-width: 820px) {
+    display: inline;
+  }
+}
+
+p {
+  display: inline;
+  @media screen and (min-width: 820px) {
+    display: none;
+  }
 }
