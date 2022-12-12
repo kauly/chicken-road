@@ -1,5 +1,8 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::{WorldInspectorParams, WorldInspectorPlugin};
+use bevy_inspector_egui::WorldInspectorPlugin;
+
+#[cfg(target_arch = "wasm32")]
+use bevy_inspector_egui::WorldInspectorParams;
 
 mod enemy;
 mod game_over;
