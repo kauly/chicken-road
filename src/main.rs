@@ -22,11 +22,12 @@ const COLOR_YELLOW: (f32, f32, f32) = (255. / 255., 202. / 255., 58. / 255.);
 const COLOR_GRAY: (f32, f32, f32) = (141. / 255., 153. / 255., 174. / 255.);
 
 #[derive(Resource)]
-pub struct GameTextures {
+pub struct GameAssets {
     player: Handle<TextureAtlas>,
     enemy_red: Handle<Image>,
     enemy_green: Handle<Image>,
     road: Handle<Image>,
+    font: Handle<Font>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -37,8 +38,9 @@ pub enum GameState {
 }
 
 fn main() {
-    App::new()
-        .insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
+    let mut app = App::new();
+
+    app.insert_resource(ClearColor(Color::rgb(1., 1., 1.)))
         .add_state(GameState::Menu)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             window: WindowDescriptor {
@@ -49,9 +51,12 @@ fn main() {
                 ..default()
             },
             ..default()
-        }))
-        .add_plugin(WorldInspectorPlugin::new())
-        .add_plugin(menu::MenuPlugin)
+        }));
+
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_plugin(WorldInspectorPlugin::new());
+
+    app.add_plugin(menu::MenuPlugin)
         .add_plugin(in_game::InGamePlugin)
         .add_plugin(game_over::GameOverPlugin)
         .add_startup_system(setup_system)
@@ -70,10 +75,11 @@ fn setup_system(
         TextureAtlas::from_grid(texture_handle, Vec2::new(16., 16.), 6, 4, None, None);
     let player = texture_atlases.add(texture_atlas);
 
-    commands.insert_resource(GameTextures {
+    commands.insert_resource(GameAssets {
         enemy_green: asset_server.load("imgs/car_green.png"),
         enemy_red: asset_server.load("imgs/car_red.png"),
         road: asset_server.load("imgs/road.png"),
+        font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
         player,
     });
 }

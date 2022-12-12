@@ -1,4 +1,4 @@
-use crate::{GameTextures, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP, WIN_HEIGHT};
+use crate::{GameAssets, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP, WIN_HEIGHT};
 use bevy::prelude::*;
 
 const PLAYER_RIGHT_SPRITE_INDEX: (usize, usize) = (0, 5);
@@ -15,6 +15,7 @@ fn get_sprite_index(dim: (usize, usize), current_index: usize) -> usize {
     return index;
 }
 
+#[derive(PartialEq, Eq)]
 pub enum Sidewalk {
     Top,
     Bottom,
@@ -56,7 +57,7 @@ pub enum Direction {
 #[derive(Component)]
 pub struct Player;
 
-pub fn spawn_player(mut commands: Commands, game_textures: Res<GameTextures>) {
+pub fn spawn_player(mut commands: Commands, game_textures: Res<GameAssets>) {
     commands
         .spawn(SpriteSheetBundle {
             texture_atlas: game_textures.player.clone(),

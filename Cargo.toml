@@ -9,3 +9,6 @@ edition = "2021"
 bevy = "0.9.1"
 bevy-inspector-egui = "0.14.0"
 rand = "0.8.5"
+
+[profile.release]
+opt-level = 'z'

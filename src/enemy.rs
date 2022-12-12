@@ -1,11 +1,10 @@
 use crate::{
     player::{Player, PlayerState},
-    GameState, GameTextures, BASE_SPEED, PLAYER_DIM, TIME_STEP, WIN_WIDTH,
+    GameAssets, GameState, BASE_SPEED, PLAYER_DIM, TIME_STEP, WIN_WIDTH,
 };
 use bevy::math::Vec3Swizzles;
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 use rand::{thread_rng, Rng};
-use std::time::Duration;
 
 const FIRST_LANE: f32 = -210.;
 const SECOND_LANE: f32 = 0.;
@@ -26,18 +25,12 @@ pub struct EnemyVelocity {
 
 #[derive(Resource, Default)]
 pub struct EnemySpawnConfig {
-    timer: Timer,
-}
-
-pub fn setup_spawn_enemy_system(mut commands: Commands) {
-    commands.insert_resource(EnemySpawnConfig {
-        timer: Timer::new(Duration::from_secs(2), TimerMode::Repeating),
-    });
+    pub timer: Timer,
 }
 
 pub fn spawn_enemy_system(
     mut commands: Commands,
-    game_textures: Res<GameTextures>,
+    game_textures: Res<GameAssets>,
     mut spawn_timer: ResMut<EnemySpawnConfig>,
     time: Res<Time>,
     player_state: Res<PlayerState>,
@@ -95,14 +88,14 @@ pub fn move_enemy_system(
 
 pub fn enemy_hit_player_system(
     mut commands: Commands,
-    mut enemy_query: Query<(Entity, &Transform), With<Enemy>>,
+    mut enemy_query: Query<&Transform, With<Enemy>>,
     player_query: Query<(Entity, &Transform), With<Player>>,
     mut player_state: ResMut<PlayerState>,
     mut game_state: ResMut<State<GameState>>,
 ) {
     if let Ok((player_ent, player_tf)) = player_query.get_single() {
         let player_scale = Vec2::from(player_tf.scale.xy());
-        for (enemy_ent, enemy_tf) in enemy_query.iter_mut() {
+        for enemy_tf in enemy_query.iter_mut() {
             let enemy_scale = Vec2::from(enemy_tf.scale.xy());
 
             let collision = collide(
@@ -115,7 +108,6 @@ pub fn enemy_hit_player_system(
             if let Some(_) = collision {
                 player_state.alive = false;
                 commands.entity(player_ent).despawn();
-                commands.entity(enemy_ent).despawn();
 
                 game_state.set(GameState::GameOver).unwrap();
             }

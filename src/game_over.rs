@@ -1,6 +1,7 @@
 use crate::{
     menu::{button_control_system, despawn_ui_system, Ancestor},
-    GameState, COLOR_RED, COLOR_YELLOW, SIDE_WALK, WIN_HEIGHT, WIN_WIDTH,
+    player::PlayerState,
+    GameAssets, GameState, COLOR_RED, COLOR_YELLOW, SIDE_WALK, WIN_HEIGHT, WIN_WIDTH,
 };
 use bevy::prelude::*;
 pub struct GameOverPlugin;
@@ -17,13 +18,17 @@ impl Plugin for GameOverPlugin {
     }
 }
 
-fn setup_game_over_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_game_over_ui_system(
+    mut commands: Commands,
+    game_assets: Res<GameAssets>,
+    player_state: Res<PlayerState>,
+) {
     commands
         .spawn(NodeBundle {
             style: Style {
                 size: Size::new(Val::Px(WIN_WIDTH), Val::Px(WIN_HEIGHT + (SIDE_WALK * 2.))),
                 flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
+                justify_content: JustifyContent::SpaceAround,
                 align_items: AlignItems::Center,
                 padding: UiRect::all(Val::Px(20.)),
                 ..default()
@@ -36,8 +41,18 @@ fn setup_game_over_ui_system(mut commands: Commands, asset_server: Res<AssetServ
             parent.spawn(TextBundle::from_section(
                 "GAME OVER",
                 TextStyle {
-                    font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                    font: game_assets.font.clone(),
                     font_size: 100.,
+                    color: Color::rgb(COLOR_RED.0, COLOR_RED.1, COLOR_RED.2),
+                },
+            ));
+        })
+        .with_children(|parent| {
+            parent.spawn(TextBundle::from_section(
+                format!("You reached the level {}", player_state.level),
+                TextStyle {
+                    font: game_assets.font.clone(),
+                    font_size: 25.,
                     color: Color::rgb(COLOR_RED.0, COLOR_RED.1, COLOR_RED.2),
                 },
             ));
@@ -58,7 +73,7 @@ fn setup_game_over_ui_system(mut commands: Commands, asset_server: Res<AssetServ
                     parent.spawn(TextBundle::from_section(
                         "PLAY AGAIN",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 50.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },

@@ -1,4 +1,4 @@
-use crate::{GameState, COLOR_RED, COLOR_YELLOW, SIDE_WALK, WIN_HEIGHT, WIN_WIDTH};
+use crate::{GameAssets, GameState, COLOR_RED, COLOR_YELLOW, SIDE_WALK, WIN_HEIGHT, WIN_WIDTH};
 use bevy::prelude::*;
 
 pub struct MenuPlugin;
@@ -16,7 +16,7 @@ impl Plugin for MenuPlugin {
     }
 }
 
-fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_ui_system(mut commands: Commands, game_assets: Res<GameAssets>) {
     commands
         .spawn(NodeBundle {
             style: Style {
@@ -46,7 +46,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "The Chicken Road",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 100.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
@@ -87,7 +87,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                             parent.spawn(TextBundle::from_section(
                                 "START",
                                 TextStyle {
-                                    font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                                    font: game_assets.font.clone(),
                                     font_size: 50.,
                                     color: Color::rgb(COLOR_RED.0, COLOR_RED.1, COLOR_RED.2),
                                 },
@@ -112,7 +112,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "COMMANDS",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 35.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
@@ -122,17 +122,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "Enter -> START",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
-                            font_size: 25.,
-                            color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
-                        },
-                    ));
-                })
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "P -> PAUSE",
-                        TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 25.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
@@ -142,7 +132,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "W -> FORWARD",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 25.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
@@ -152,7 +142,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "D -> RIGHT",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 25.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
@@ -162,7 +152,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "S -> DOWNWARD",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 25.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
@@ -172,7 +162,7 @@ fn setup_ui_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     parent.spawn(TextBundle::from_section(
                         "A -> LEFT",
                         TextStyle {
-                            font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
+                            font: game_assets.font.clone(),
                             font_size: 25.,
                             color: Color::rgb(COLOR_YELLOW.0, COLOR_YELLOW.1, COLOR_YELLOW.2),
                         },
