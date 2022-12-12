@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::WorldInspectorPlugin;
+use bevy_inspector_egui::{WorldInspectorParams, WorldInspectorPlugin};
 
 mod enemy;
 mod game_over;
@@ -53,14 +53,16 @@ fn main() {
             ..default()
         }));
 
-    #[cfg(not(target_arch = "wasm32"))]
-    app.add_plugin(WorldInspectorPlugin::new());
-
-    app.add_plugin(menu::MenuPlugin)
+    app.add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(menu::MenuPlugin)
         .add_plugin(in_game::InGamePlugin)
         .add_plugin(game_over::GameOverPlugin)
-        .add_startup_system(setup_system)
-        .run();
+        .add_startup_system(setup_system);
+
+    #[cfg(target_arch = "wasm32")]
+    app.add_system(disable_inspector_system);
+
+    app.run();
 }
 
 fn setup_system(
@@ -82,4 +84,11 @@ fn setup_system(
         font: asset_server.load("fonts/RubikSprayPaint-Regular.ttf"),
         player,
     });
+}
+
+#[cfg(target_arch = "wasm32")]
+fn disable_inspector_system(mut world_inspector_params: ResMut<WorldInspectorParams>) {
+    if world_inspector_params.enabled {
+        world_inspector_params.enabled = false;
+    }
 }
