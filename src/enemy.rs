@@ -54,7 +54,7 @@ pub fn spawn_enemy_system(
                 texture: car_sprite,
                 transform: Transform {
                     translation: Vec3 {
-                        x: (-WIN_WIDTH / 2.) + (ENEMY_DIM.0 * ENEMY_SCALE) - 50.,
+                        x: (-WIN_WIDTH / 2.) - (ENEMY_DIM.0 * ENEMY_SCALE),
                         y: lanes[lane_index],
                         z: 2.,
                     },

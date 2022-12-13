@@ -1,10 +1,15 @@
-use crate::{GameAssets, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP, WIN_HEIGHT};
+use crate::{GameAssets, BASE_SPEED, PLAYER_DIM, SIDE_WALK, TIME_STEP, WIN_HEIGHT, WIN_WIDTH};
 use bevy::prelude::*;
 
 const PLAYER_RIGHT_SPRITE_INDEX: (usize, usize) = (0, 5);
 const PLAYER_UP_SPRITE_INDEX: (usize, usize) = (6, 11);
 const PLAYER_LEFT_SPRITE_INDEX: (usize, usize) = (12, 17);
 const PLAYER_DOWN_SPRITE_INDEX: (usize, usize) = (18, 23);
+
+const ARENA_LEFT: f32 = -WIN_WIDTH / 2. + PLAYER_DIM;
+const ARENA_RIGHT: f32 = WIN_WIDTH / 2. - PLAYER_DIM;
+const ARENA_TOP: f32 = (WIN_HEIGHT + SIDE_WALK * 2.) / 2. - PLAYER_DIM;
+const ARENA_BOTTOM: f32 = -(WIN_HEIGHT + SIDE_WALK * 2.) / 2. + PLAYER_DIM;
 
 fn get_sprite_index(dim: (usize, usize), current_index: usize) -> usize {
     let index = if current_index >= dim.0 && current_index < dim.1 {
@@ -99,10 +104,15 @@ pub fn move_player_system(
     //time: Res<Time>,
 ) {
     if let Ok((mut transform, velocity, mut sprite, direction)) = player_query.get_single_mut() {
-        let translation = &mut transform.translation;
-        translation.x += velocity.x * TIME_STEP * BASE_SPEED;
-        translation.y += velocity.y * TIME_STEP * BASE_SPEED;
         if velocity.x != 0. || velocity.y != 0. {
+            let translation = &mut transform.translation;
+
+            let new_player_x_position = translation.x + velocity.x * TIME_STEP * BASE_SPEED;
+            let new_player_y_position = translation.y + velocity.y * TIME_STEP * BASE_SPEED;
+
+            translation.x = new_player_x_position.clamp(ARENA_LEFT, ARENA_RIGHT);
+            translation.y = new_player_y_position.clamp(ARENA_BOTTOM, ARENA_TOP);
+
             sprite.index = match direction {
                 Direction::Up => get_sprite_index(PLAYER_UP_SPRITE_INDEX, sprite.index),
                 Direction::Down => get_sprite_index(PLAYER_DOWN_SPRITE_INDEX, sprite.index),
